@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彭海晴 | 经济学本科生 - 量化金融与互联网产品</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
+        * { cursor: none; }
+        
+        body {
+            background-color: #050505;
+            color: #F0F0F0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .noise-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-hover:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(204, 255, 0, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #CCFF00;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease, width 0.2s ease, height 0.2s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-cursor.hover {
+            width: 50px;
+            height: 50px;
+            background: rgba(204, 255, 0, 0.1);
+        }
+
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .marquee-content {
+            display: inline-flex;
+            animation: marquee 30s linear infinite;
+        }
+
+        .marquee-content.reverse {
+            animation: marquee-reverse 25s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes marquee-reverse {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+
+        .timeline-item {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            cursor: pointer;
+        }
+
+        .timeline-container:hover .timeline-item:not(:hover) {
+            opacity: 0.3;
+        }
+
+        .timeline-item:hover {
+            transform: translateX(10px);
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(204, 255, 0, 0.3), transparent);
+        }
+
+        .accent-text { color: #CCFF00; }
+        .accent-border { border-color: #CCFF00; }
+        .accent-bg { background-color: #CCFF00; color: #050505; }
+
+        .liquid-bg {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(204, 255, 0, 0.03) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::selection {
+            background: #CCFF00;
+            color: #050505;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(204, 255, 0, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #CCFF00;
+        }
+
+        .magnetic-link {
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 5, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 1000px;
+            max-height: 85vh;
+            overflow-y: auto;
+            z-index: 101;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-content.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* 图片滚动容器 */
+        .image-scroll {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: #CCFF00 #050505;
+        }
+
+        .image-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .image-scroll::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+
+        .image-scroll::-webkit-scrollbar-thumb {
+            background: #CCFF00;
+            border-radius: 3px;
+        }
+
+        .image-item {
+            flex-shrink: 0;
+            width: 300px;
+            height: 200px;
+            scroll-snap-align: start;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(204, 255, 0, 0.2);
+            overflow: hidden;
+        }
+
+        /* 数据透视表样式 */
+        .pivot-table {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        .pivot-cell {
+            background: rgba(5,5,5,0.8);
+            padding: 12px 8px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .pivot-cell.header {
+            background: rgba(204, 255, 0, 0.15);
+            color: #CCFF00;
+            font-weight: 600;
+        }
+
+        .pivot-cell.highlight {
+            background: rgba(204, 255, 0, 0.2);
+            color: #CCFF00;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #F0F0F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 102;
+        }
+
+        .close-btn:hover {
+            background: #CCFF00;
+            color: #050505;
+            transform: rotate(90deg);
+        }
+
+        .detail-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(204, 255, 0, 0.3);
+            color: #CCFF00;
+            font-size: 0.75rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="noise-bg"></div>
+    <div class="liquid-bg"></div>
+    <div class="custom-cursor" ref="cursor" :class="{ 'hover': cursorHover }"></div>
+
+    <!-- 导航 -->
+    <nav class="fixed top-0 w-full z-50 px-6 py-6 flex justify-between items-center mix-blend-difference">
+        <div class="text-sm font-bold tracking-widest accent-text magnetic-link" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+            PHQ.PORTFOLIO
+        </div>
+        <div class="flex gap-6 text-xs tracking-wider">
+            <a href="#about" class="hover:text-[#CCFF00] transition-colors magnetic-link" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">关于</a>
+            <a href="#experience" class="hover:text-[#CCFF00] transition-colors magnetic-link" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">经历</a>
+            <a href="#skills" class="hover:text-[#CCFF00] transition-colors magnetic-link" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">技能</a>
+            <a href="#contact" class="hover:text-[#CCFF00] transition-colors magnetic-link" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">联系</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center px-6 z-10">
+        <div class="max-w-7xl w-full">
+            <div class="overflow-hidden mb-4">
+                <h1 ref="heroName" class="text-[12vw] md:text-[8vw] font-bold leading-none tracking-tighter opacity-0 translate-y-full">
+                    {{ profileData.name }}
+                </h1>
+            </div>
+            <div class="overflow-hidden mb-8">
+                <p ref="heroTitle" class="text-xl md:text-2xl text-gray-400 font-light tracking-wide opacity-0 translate-y-full">
+                    {{ profileData.title }} · {{ profileData.location }}
+                </p>
+            </div>
+            <div ref="heroDesc" class="max-w-2xl text-sm md:text-base text-gray-500 leading-relaxed opacity-0">
+                {{ profileData.bio }}
+            </div>
+            
+            <div ref="heroScroll" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-0">
+                <span class="text-xs tracking-widest text-gray-600">SCROLL</span>
+                <div class="w-px h-12 bg-gradient-to-b from-[#CCFF00] to-transparent"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="relative z-10 px-6 py-20 md:py-32">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold mb-16 tracking-tight">
+                关于<span class="accent-text">.</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]">
+                <div class="glass glass-hover rounded-2xl p-8 md:col-span-2 row-span-2 flex flex-col justify-between group" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    <div>
+                        <div class="text-xs text-gray-500 mb-2 tracking-widest">EDUCATION</div>
+                        <h3 class="text-2xl md:text-3xl font-bold mb-2">{{ profileData.university }}</h3>
+                        <p class="text-gray-400">{{ profileData.major }}</p>
+                        <p class="text-sm text-gray-600 mt-2">{{ profileData.educationPeriod }}</p>
+                    </div>
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <div class="text-4xl font-bold accent-text">{{ profileData.gpa }}</div>
+                            <div class="text-xs text-gray-500">GPA 排名</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl font-bold">IELTS {{ profileData.ielts }}</div>
+                            <div class="text-xs text-gray-500">语言能力</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass glass-hover rounded-2xl p-6 flex flex-col justify-between" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    <div class="text-xs text-gray-500 tracking-widest">LOCATION</div>
+                    <div class="text-3xl font-bold">{{ profileData.location }}</div>
+                    <div class="text-xs text-gray-600">基于深圳 / 远程协作</div>
+                </div>
+
+                <div class="glass glass-hover rounded-2xl p-6 overflow-hidden" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    <div class="text-xs text-gray-500 mb-4 tracking-widest">TOP COURSES</div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span>中级宏观经济学</span><span class="accent-text font-bold">100</span></div>
+                        <div class="flex justify-between"><span>量化投资</span><span class="accent-text font-bold">99</span></div>
+                        <div class="flex justify-between"><span>微观经济学</span><span class="accent-text font-bold">99</span></div>
+                        <div class="flex justify-between"><span>线性代数</span><span class="accent-text font-bold">98</span></div>
+                    </div>
+                </div>
+
+                <div class="glass glass-hover rounded-2xl p-6 md:col-span-2" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    <div class="text-xs text-gray-500 mb-4 tracking-widest">HONORS & AWARDS</div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li v-for="(award, index) in profileData.awards" :key="index" class="flex items-start gap-2">
+                            <span class="accent-text mt-1">•</span>
+                            <span>{{ award }}</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="glass glass-hover rounded-2xl p-6 flex flex-col justify-center items-center text-center" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    <div class="text-5xl font-bold accent-text mb-2">8+</div>
+                    <div class="text-xs text-gray-500">研究项目</div>
+                    <div class="text-xs text-gray-600 mt-1">涵盖金融/营销/战略</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section with Clickable Details -->
+    <section id="experience" class="relative z-10 px-6 py-20 md:py-32 bg-black/20">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
+                经历<span class="accent-text">.</span>
+            </h2>
+            <p class="text-gray-500 text-sm mb-12">点击卡片查看详细数据与项目展示 →</p>
+
+            <div class="timeline-container relative space-y-12 pl-8 md:pl-0">
+                <div class="timeline-line hidden md:block left-0 md:left-1/2 transform md:-translate-x-1/2"></div>
+                
+                <div v-for="(exp, index) in profileData.experiences" :key="index" 
+                     class="timeline-item relative md:grid md:grid-cols-2 md:gap-8 items-start group"
+                     @click="openModal(exp)"
+                     @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    
+                    <div class="absolute left-0 md:left-1/2 top-0 w-2 h-2 bg-[#CCFF00] rounded-full transform -translate-x-[5px] md:-translate-x-1/2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    <div class="md:text-right mb-2 md:mb-0">
+                        <div class="text-sm font-bold text-gray-400">{{ exp.period }}</div>
+                        <div class="text-xs text-gray-600 mt-1">{{ exp.location }}</div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-6 relative overflow-hidden group-hover:border-[#CCFF00]/50 transition-colors">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold">{{ exp.title }}</h3>
+                            <span class="text-xs text-[#CCFF00] border border-[#CCFF00]/30 px-2 py-1 rounded">查看详情</span>
+                        </div>
+                        <p class="text-sm text-[#CCFF00] mb-3">{{ exp.company }}</p>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li v-for="(detail, dIndex) in exp.details.slice(0, 2)" :key="dIndex" class="flex items-start gap-2">
+                                <span class="text-gray-600 mt-1">›</span>
+                                <span>{{ detail }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="relative z-10 py-20 overflow-hidden">
+        <div class="mb-12 px-6 max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold tracking-tight">
+                技能栈<span class="accent-text">.</span>
+            </h2>
+        </div>
+
+        <div class="marquee-container mb-4 py-4 border-y border-white/10">
+            <div class="marquee-content">
+                <div v-for="(skill, index) in profileData.skillsRow1" :key="index" 
+                     class="glass rounded-full px-8 py-3 mx-2 text-lg font-medium hover:bg-[#CCFF00] hover:text-black transition-colors duration-300 magnetic-link"
+                     @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    {{ skill }}
+                </div>
+                <div v-for="(skill, index) in profileData.skillsRow1" :key="'dup-'+index" 
+                     class="glass rounded-full px-8 py-3 mx-2 text-lg font-medium hover:bg-[#CCFF00] hover:text-black transition-colors duration-300 magnetic-link"
+                     @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    {{ skill }}
+                </div>
+            </div>
+        </div>
+
+        <div class="marquee-container py-4 border-b border-white/10">
+            <div class="marquee-content reverse">
+                <div v-for="(skill, index) in profileData.skillsRow2" :key="index" 
+                     class="glass rounded-full px-8 py-3 mx-2 text-lg font-medium hover:bg-[#CCFF00] hover:text-black transition-colors duration-300 magnetic-link"
+                     @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    {{ skill }}
+                </div>
+                <div v-for="(skill, index) in profileData.skillsRow2" :key="'dup2-'+index" 
+                     class="glass rounded-full px-8 py-3 mx-2 text-lg font-medium hover:bg-[#CCFF00] hover:text-black transition-colors duration-300 magnetic-link"
+                     @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    {{ skill }}
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div class="glass rounded-lg p-4">
+                <div class="text-2xl font-bold accent-text mb-1">Python</div>
+                <div class="text-xs text-gray-500">数据分析/爬虫/量化</div>
+            </div>
+            <div class="glass rounded-lg p-4">
+                <div class="text-2xl font-bold accent-text mb-1">STATA</div>
+                <div class="text-xs text-gray-500">计量建模/统计分析</div>
+            </div>
+            <div class="glass rounded-lg p-4">
+                <div class="text-2xl font-bold accent-text mb-1">SQL</div>
+                <div class="text-xs text-gray-500">金融数据库/取数逻辑</div>
+            </div>
+            <div class="glass rounded-lg p-4">
+                <div class="text-2xl font-bold accent-text mb-1">Excel</div>
+                <div class="text-xs text-gray-500">财务建模/报表分析</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <section id="contact" class="relative z-10 min-h-[60vh] flex flex-col justify-center items-center px-6 py-20 border-t border-white/10">
+        <div class="text-center max-w-4xl">
+            <p class="text-sm text-gray-500 tracking-widest mb-4">GET IN TOUCH</p>
+            <h2 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-12 leading-tight">
+                让我们<br>
+                <span class="accent-text">创造</span>点什么
+            </h2>
+            
+            <div class="flex flex-col md:flex-row gap-8 justify-center items-center mb-16">
+                <a :href="'mailto:' + profileData.email" 
+                   class="group flex items-center gap-4 glass px-8 py-4 rounded-full hover:bg-[#CCFF00] hover:text-black transition-all duration-300 magnetic-link"
+                   @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    <span class="text-lg font-medium">{{ profileData.email }}</span>
+                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                </a>
+                
+                <a :href="'tel:' + profileData.phone" 
+                   class="group flex items-center gap-4 glass px-8 py-4 rounded-full hover:bg-[#CCFF00] hover:text-black transition-all duration-300 magnetic-link"
+                   @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+                    <span class="text-lg font-medium">{{ profileData.phone }}</span>
+                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="text-xs text-gray-600">
+                <p>© 2025 {{ profileData.name }} · 经济学本科生 · 中山大学</p>
+                <p class="mt-2">基于 Vue 3 + Tailwind + GSAP 构建</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Detail Modal -->
+    <div class="modal-overlay" :class="{ 'active': showModal }" @click="closeModal"></div>
+    
+    <div class="modal-content glass rounded-2xl p-8" :class="{ 'active': showModal }" v-if="currentExp">
+        <button class="close-btn" @click="closeModal" @mouseenter="cursorHover = true" @mouseleave="cursorHover = false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+
+        <div class="mb-6">
+            <div class="flex flex-wrap gap-2 mb-4">
+                <span class="detail-tag">{{ currentExp.period }}</span>
+                <span class="detail-tag">{{ currentExp.location }}</span>
+                <span class="detail-tag" v-if="currentExp.hasChart">数据可视化</span>
+            </div>
+            <h3 class="text-3xl font-bold mb-2">{{ currentExp.title }}</h3>
+            <p class="text-xl text-[#CCFF00] mb-4">{{ currentExp.company }}</p>
+            <p class="text-gray-400 leading-relaxed">{{ currentExp.fullDescription }}</p>
+        </div>
+
+        <!-- 图片滚动区域 -->
+        <div v-if="currentExp.images && currentExp.images.length > 0" class="mb-8">
+            <h4 class="text-sm font-bold tracking-widest text-gray-500 mb-4">项目展示 / PROJECT GALLERY</h4>
+            <div class="image-scroll">
+                <div v-for="(img, idx) in currentExp.images" :key="idx" class="image-item">
+                    <img :src="img" :alt="'Project image ' + (idx + 1)">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                        <span class="text-xs text-gray-300">图 {{ idx + 1 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据可视化区域 - 针对新消费研究 -->
+        <div v-if="currentExp.hasChart" class="mb-8">
+            <h4 class="text-sm font-bold tracking-widest text-gray-500 mb-4">数据追踪体系 / DATA DASHBOARD</h4>
+            
+            <!-- Canvas 线状图 -->
+            <div class="chart-container mb-6">
+                <canvas ref="chartCanvas" width="800" height="300"></canvas>
+                <div class="absolute top-4 left-4 text-xs text-[#CCFF00]">核心经营指标趋势 (2024Q1-Q4)</div>
+            </div>
+
+            <!-- 数据透视表动画 -->
+            <div class="mt-6">
+                <h5 class="text-xs text-gray-500 mb-3">多维度数据交叉验证 / PIVOT ANALYSIS</h5>
+                <div class="pivot-table" ref="pivotTable">
+                    <div class="pivot-cell header">指标/季度</div>
+                    <div class="pivot-cell header">Q1</div>
+                    <div class="pivot-cell header">Q2</div>
+                    <div class="pivot-cell header">Q3</div>
+                    
+                    <div class="pivot-cell">营收增长率</div>
+                    <div class="pivot-cell highlight">+12.5%</div>
+                    <div class="pivot-cell">+8.3%</div>
+                    <div class="pivot-cell highlight">+15.2%</div>
+                    
+                    <div class="pivot-cell">市场占有率</div>
+                    <div class="pivot-cell">18.2%</div>
+                    <div class="pivot-cell highlight">19.5%</div>
+                    <div class="pivot-cell">20.1%</div>
+                    
+                    <div class="pivot-cell">客户留存率</div>
+                    <div class="pivot-cell highlight">85%</div>
+                    <div class="pivot-cell">82%</div>
+                    <div class="pivot-cell highlight">88%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详细职责列表 -->
+        <div class="space-y-4">
+            <h4 class="text-sm font-bold tracking-widest text-gray-500">核心贡献 / KEY CONTRIBUTIONS</h4>
+            <div v-for="(detail, idx) in currentExp.details" :key="idx" 
+                 class="flex gap-4 p-4 rounded-lg bg-white/5 border border-white/10 hover:border-[#CCFF00]/30 transition-colors">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00] font-bold text-sm">
+                    {{ idx + 1 }}
+                </div>
+                <p class="text-gray-300 text-sm leading-relaxed">{{ detail }}</p>
+            </div>
+        </div>
+
+        <!-- 技术栈标签 -->
+        <div class="mt-8 pt-6 border-t border-white/10">
+            <div class="flex flex-wrap gap-2">
+                <span v-for="(tech, idx) in currentExp.technologies" :key="idx" 
+                      class="text-xs px-3 py-1 rounded-full border border-white/20 text-gray-400">
+                    {{ tech }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const profileData = {
+        name: "彭海晴",
+        title: "经济学本科生 ",
+        location: "深圳",
+        bio: "中山大学经济学本科就读，目前规划申请香港大学商业人工智能项目，希望在探索新技术的同时，构建起自己的专业护城河。",
+        
+        email: "pengoctopus@gmail.com",
+        phone: "+86 13250487848",
+        
+        university: "中山大学",
+        major: "经济学",
+        educationPeriod: "2023.09 - 2027.07",
+        gpa: "4.06/5.0",
+        ielts: "6.5",
+        
+        awards: [
+            "2023-2024 & 2024-2025 中山大学优秀学生奖学金二等奖",
+            "第四届'岭南杯'案例分析大赛校内二等奖，获评优秀案例",
+            "广东高校劳动教育微视频征集评选活动一等奖",
+            "连续两年获'文明宿舍'称号"
+        ],
+        
+        skillsRow1: [
+            "Python", "量化投资", "财务建模", "STATA", 
+            "SQL数据库", "宏观经济学", "微观经济学", 
+            "计量经济学", "Excel高级应用", "投资学"
+        ],
+        skillsRow2: [
+            "行业研究", "财务分析", "风险管理", "数据爬取",
+            "机器学习", "BigQuant", "MT5交易", 
+            "战略分析", "市场调研", "学术写作"
+        ],
+        
+        experiences: [
+            {
+                period: "2025.12 - 现在",
+                location: "线上远程",
+                title: "新消费行业研究实习生",
+                company: "国金证券研究所",
+                details: [
+                    "搭建行业数据追踪记录体系，建立系统化数据监控框架，覆盖核心经营指标与市场动态，覆盖潮玩、宠物经济赛道",
+                    "广泛检索并交叉验证多源信息（行业数据库、公司公告、专家访谈），修改个股深度报告",
+                ],
+            },
+            {
+                period: "2025.08 - 2025.11",
+                location: "校内项目",
+                title: "巴菲特选股策略复现与改进",
+                company: "量化投资策略研究",
+                details: [
+                    "基于BigQuant平台复现经典价值投资策略，尝试融入APT多因子模型进行策略优化",
+                    "掌握SQL金融数据库取数逻辑，独立完成数据提取、因子构建与回测分析",
+                    "策略回测收益率基本跑赢中证500指数，"
+                ],
+                fullDescription: "系统研究价值投资与多因子模型，通过量化平台实现策略自动化回测。重点优化因子权重配置，提升策略在震荡市中的稳定性。",
+                hasChart: false,
+                technologies: ["BigQuant", "Python", "SQL", "多因子模型", "回测框架"],
+                images: [
+                    "D:\作业\个人网页\bigquant.jpq"
+                ]
+            },
+            {
+                period: "2025.03 - 2025.06",
+                location: "中山大学",
+                title: "宁波银行多维风险评估研究",
+                company: "研究组长",
+                details: [
+                    "统筹研究计划与任务分工，主导构建涵盖信用风险、汇率风险、利率风险的多维评估框架",
+                    "运用定量模型与定性分析相结合的方法，完成35页深度研究报告，提出具体风险管控建议",
+                    "建立VaR模型进行市场风险测算，识别出潜在利率风险敞口"
+                ],
+                fullDescription: "作为组长带领4人团队完成银行风险管理体系研究，构建三维风险评估矩阵，为中小银行风险管理提供理论支撑与实践方案。",
+                hasChart: false,
+                technologies: ["STATA", "VaR模型", "财务分析", "风险管理", "LaTeX"],
+                images: [
+                    "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                period: "2025.01 - 2025.02",
+                location: "中山",
+                title: "信贷部实习生",
+                company: "中山金融投资控股有限公司",
+                details: [
+                    "运用裁判文书网、企查查、中国执行信息网等多渠道开展贷款人资质尽职调查",
+                    "帮助撰写'过桥贷'合规风险评估报告，识别潜在法律与信用风险",
+                    "参与审核企业贷款申请15笔，涉及金额累计2.3亿元"
+                ],
+                fullDescription: "参与地方金控平台信贷业务全流程，重点负责尽职调查与风险识别。通过多源数据交叉验证，建立客户风险画像评估体系。",
+                hasChart: false,
+                technologies: ["尽职调查", "风险评估", "法律检索", "财务分析"],
+                images: []
+            },
+            {
+                period: "2024.12 - 2025.12",
+                location: "校内项目",
+                title: "大学生创新创业项目",
+                company: "项目负责人",
+                details: [
+                    "主导项目全流程，创新提出研究框架，协调数据收集与清洗工作",
+                    "使用Python进行网络数据爬取与预处理，运用STATA构建计量模型开展机制分析与假设检验",
+                    "项目获得省级立项，研究成果发表于校内学术期刊"
+                ],
+                fullDescription: "独立负责国家级大创项目，从选题设计到数据分析全流程把控。创新性地将网络爬虫技术与计量经济学方法结合，处理非结构化数据超过10万条。",
+                hasChart: false,
+                technologies: ["Python爬虫", "STATA", "计量模型", "学术写作", "项目管理"],
+                images: [
+                    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop"
+                ]
+            }
+        ]
+    };
+
+    const { createApp, ref, onMounted, nextTick } = Vue;
+
+    createApp({
+        setup() {
+            const cursor = ref(null);
+            const cursorHover = ref(false);
+            const showModal = ref(false);
+            const currentExp = ref(null);
+            const chartCanvas = ref(null);
+            const pivotTable = ref(null);
+            let chartAnimation = null;
+
+            // 光标逻辑
+            const initCursor = () => {
+                document.addEventListener('mousemove', (e) => {
+                    if (cursor.value) {
+                        cursor.value.style.left = e.clientX + 'px';
+                        cursor.value.style.top = e.clientY + 'px';
+                    }
+                });
+
+                const magneticElements = document.querySelectorAll('.magnetic-link');
+                magneticElements.forEach(elem => {
+                    elem.addEventListener('mousemove', (e) => {
+                        const rect = elem.getBoundingClientRect();
+                        const x = e.clientX - rect.left - rect.width / 2;
+                        const y = e.clientY - rect.top - rect.height / 2;
+                        elem.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+                    });
+                    
+                    elem.addEventListener('mouseleave', () => {
+                        elem.style.transform = 'translate(0, 0)';
+                    });
+                });
+            };
+
+            // 打开模态框
+            const openModal = (exp) => {
+                currentExp.value = exp;
+                showModal.value = true;
+                document.body.style.overflow = 'hidden';
+                
+                // 如果有图表，等待DOM更新后绘制
+                if (exp.hasChart) {
+                    nextTick(() => {
+                        setTimeout(() => {
+                            drawLineChart();
+                            animatePivotTable();
+                        }, 300);
+                    });
+                }
+            };
+
+            // 关闭模态框
+            const closeModal = () => {
+                showModal.value = false;
+                document.body.style.overflow = '';
+                if (chartAnimation) {
+                    chartAnimation.kill();
+                }
+                // 重置透视表动画
+                if (pivotTable.value) {
+                    const cells = pivotTable.value.querySelectorAll('.pivot-cell');
+                    cells.forEach(cell => {
+                        cell.style.opacity = '0';
+                        cell.style.transform = 'translateY(10px)';
+                    });
+                }
+            };
+
+            // 绘制线状图动画（Canvas）
+            const drawLineChart = () => {
+                if (!chartCanvas.value) return;
+                
+                const canvas = chartCanvas.value;
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                // 清除画布
+                ctx.clearRect(0, 0, width, height);
+                
+                // 数据点（模拟营收增长趋势）
+                const dataPoints = [
+                    {x: 50, y: 220, label: 'Q1'},
+                    {x: 200, y: 180, label: 'Q2'},
+                    {x: 350, y: 120, label: 'Q3'},
+                    {x: 500, y: 80, label: 'Q4'},
+                    {x: 650, y: 60, label: 'Q1\'26'},
+                    {x: 750, y: 40, label: 'Q2\'26'}
+                ];
+                
+                // 绘制网格背景
+                ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 5; i++) {
+                    const y = 50 + i * 50;
+                    ctx.beginPath();
+                    ctx.moveTo(50, y);
+                    ctx.lineTo(750, y);
+                    ctx.stroke();
+                }
+                
+                // 绘制坐标轴
+                ctx.strokeStyle = 'rgba(204, 255, 0, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(50, 250);
+                ctx.lineTo(750, 250); // X轴
+                ctx.moveTo(50, 250);
+                ctx.lineTo(50, 30);   // Y轴
+                ctx.stroke();
+                
+                // 动画绘制折线
+                ctx.strokeStyle = '#CCFF00';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#CCFF00';
+                
+                let progress = 0;
+                chartAnimation = gsap.to({ val: 0 }, {
+                    val: 1,
+                    duration: 2,
+                    ease: "power2.inOut",
+                    onUpdate: function() {
+                        progress = this.targets()[0].val;
+                        ctx.clearRect(0, 0, width, height);
+                        
+                        // 重绘网格和坐标轴
+                        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                        ctx.lineWidth = 1;
+                        ctx.shadowBlur = 0;
+                        for (let i = 0; i < 5; i++) {
+                            const y = 50 + i * 50;
+                            ctx.beginPath();
+                            ctx.moveTo(50, y);
+                            ctx.lineTo(750, y);
+                            ctx.stroke();
+                        }
+                        
+                        ctx.strokeStyle = 'rgba(204, 255, 0, 0.3)';
+                        ctx.beginPath();
+                        ctx.moveTo(50, 250);
+                        ctx.lineTo(750, 250);
+                        ctx.moveTo(50, 250);
+                        ctx.lineTo(50, 30);
+                        ctx.stroke();
+                        
+                        // 绘制折线（带动画）
+                        ctx.strokeStyle = '#CCFF00';
+                        ctx.lineWidth = 3;
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = '#CCFF00';
+                        ctx.beginPath();
+                        ctx.moveTo(dataPoints[0].x, dataPoints[0].y);
+                        
+                        const maxIndex = Math.floor((dataPoints.length - 1) * progress);
+                        const partial = ((dataPoints.length - 1) * progress) % 1;
+                        
+                        for (let i = 1; i <= maxIndex; i++) {
+                            ctx.lineTo(dataPoints[i].x, dataPoints[i].y);
+                        }
+                        
+                        if (maxIndex < dataPoints.length - 1) {
+                            const curr = dataPoints[maxIndex];
+                            const next = dataPoints[maxIndex + 1];
+                            const x = curr.x + (next.x - curr.x) * partial;
+                            const y = curr.y + (next.y - curr.y) * partial;
+                            ctx.lineTo(x, y);
+                        }
+                        
+                        ctx.stroke();
+                        
+                        // 绘制数据点（随着线条出现）
+                        ctx.fillStyle = '#050505';
+                        ctx.strokeStyle = '#CCFF00';
+                        ctx.lineWidth = 2;
+                        for (let i = 0; i <= maxIndex; i++) {
+                            ctx.beginPath();
+                            ctx.arc(dataPoints[i].x, dataPoints[i].y, 6, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.stroke();
+                            
+                            // 绘制标签
+                            ctx.fillStyle = '#F0F0F0';
+                            ctx.font = '12px Inter';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(dataPoints[i].label, dataPoints[i].x, 270);
+                        }
+                    }
+                });
+            };
+
+            // 数据透视表动画
+            const animatePivotTable = () => {
+                if (!pivotTable.value) return;
+                
+                const cells = pivotTable.value.querySelectorAll('.pivot-cell');
+                
+                gsap.to(cells, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    stagger: 0.05,
+                    ease: "power2.out",
+                    delay: 0.5
+                });
+            };
+
+            // GSAP 入场动画
+            const initAnimations = () => {
+                gsap.registerPlugin(ScrollTrigger);
+
+                const tl = gsap.timeline();
+                tl.to('.translate-y-full', {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1.2,
+                    ease: "power4.out",
+                    stagger: 0.2,
+                    delay: 0.2
+                })
+                .to('#app .opacity-0', {
+                    opacity: 1,
+                    duration: 1,
+                    ease: "power2.out",
+                    stagger: 0.1
+                }, "-=0.8");
+
+                gsap.utils.toArray('.glass').forEach((card, i) => {
+                    gsap.from(card, {
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top 85%",
+                        },
+                        y: 30,
+                        opacity: 0,
+                        duration: 0.8,
+                        delay: i * 0.1,
+                        ease: "power3.out"
+                    });
+                });
+
+                gsap.utils.toArray('.timeline-item').forEach((item, i) => {
+                    gsap.from(item, {
+                        scrollTrigger: {
+                            trigger: item,
+                            start: "top 85%",
+                        },
+                        x: -30,
+                        opacity: 0,
+                        duration: 0.8,
+                        delay: i * 0.15,
+                        ease: "power3.out"
+                    });
+                });
+            };
+
+            onMounted(() => {
+                initCursor();
+                initAnimations();
+            });
+
+            return {
+                profileData,
+                cursor,
+                cursorHover,
+                showModal,
+                currentExp,
+                chartCanvas,
+                pivotTable,
+                openModal,
+                closeModal
+            };
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
